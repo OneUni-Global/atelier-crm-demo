@@ -9,9 +9,6 @@ window.DEMO_CONFIG = {
 window.DEMO_STATUSES = ["New Enquiry", "Contacted", "Consultation", "Proposal Sent", "Confirmed", "Completed", "On Hold", "Lost"];
 window.DEMO_OPEN = ["New Enquiry", "Contacted", "Consultation", "Proposal Sent"];
 
-window.DEMO_PROFILE = "Your Company provides web, software, training and support services to other businesses. Packages start at $2,000. " +
-  "A first consultation call is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.";
-
 window.DEMO_LANGS = [
   { code: "en", name: "English", bcp: "en-US",
     q1: "What are your opening hours?", a1: "We are open Monday to Friday, from 9 am to 5 pm.",
@@ -45,22 +42,61 @@ window.DEMO_LANGS = [
     q2: "Saya ingin berbicara dengan seorang staf tentang pembayaran saya.", h: "Seorang rekan kami akan menelepon kembali ke nomor ini secepat mungkin." }
 ];
 
-/* name, email, phone, country, team size, interest, budget, page, referrer, status, deal value, days since created, owner */
-window.DEMO_CLIENTS = [
-  ["Amelia Hartwell", "amelia@example.test", "+44 7700 900111", "United Kingdom", 12, "Website redesign", "$5,000 to $10,000", "/quote", "google.com", "Contacted", 4200, 0, "Maya"],
-  ["Rashid Al Mansoori", "rashid@example.test", "+971 50 000 0000", "United Arab Emirates", 40, "Annual support plan", "$10,000 to $20,000", "/pricing", "linkedin.com", "Consultation", 8400, 3, "Idris"],
-  ["Sofia Marchetti", "sofia@example.test", "+39 340 000 0000", "Italy", 8, "Online shop setup", "$8,000 to $15,000", "/", "", "Proposal Sent", 12600, 6, "Maya"],
-  ["Daniel Okafor", "daniel@example.test", "+234 800 000 0000", "Nigeria", 5, "Marketing audit", "$2,000 to $4,000", "/contact", "bing.com", "New Enquiry", 16800, 9, "Idris"],
-  ["Hannah Berg", "hannah@example.test", "+49 151 00000000", "Germany", 25, "Staff training programme", "$15,000 to $25,000", "/services/training", "google.com", "Confirmed", 21000, 12, "Maya"],
-  ["Kenji Watanabe", "kenji@example.test", "+81 90 0000 0000", "Japan", 15, "Process automation", "$10,000 to $18,000", "/quote", "", "New Enquiry", 25200, 15, "Idris"],
-  ["Layla Haddad", "layla@example.test", "+966 50 000 0000", "Saudi Arabia", 60, "Software rollout", "$30,000 to $50,000", "/services/software", "linkedin.com", "On Hold", 29400, 18, "Maya"],
-  ["Oliver Grant", "oliver@example.test", "+1 415 555 0100", "United States", 3, "Brand identity", "$3,000 to $6,000", "/quote", "google.com", "Completed", 33600, 21, "Idris"]
+
+/* The same fictional people for every business type: name, email, phone, country, page, referrer, status, days since created, owner */
+window.DEMO_BASE = [
+  ["Amelia Hartwell", "amelia@example.test", "+44 7700 900111", "United Kingdom", "/enquiry", "google.com", "Contacted", 0, "Maya"],
+  ["Rashid Al Mansoori", "rashid@example.test", "+971 50 000 0000", "United Arab Emirates", "/pricing", "linkedin.com", "Consultation", 3, "Idris"],
+  ["Sofia Marchetti", "sofia@example.test", "+39 340 000 0000", "Italy", "/", "", "Proposal Sent", 6, "Maya"],
+  ["Daniel Okafor", "daniel@example.test", "+234 800 000 0000", "Nigeria", "/contact", "bing.com", "New Enquiry", 9, "Idris"],
+  ["Hannah Berg", "hannah@example.test", "+49 151 00000000", "Germany", "/services", "google.com", "Confirmed", 12, "Maya"],
+  ["Kenji Watanabe", "kenji@example.test", "+81 90 0000 0000", "Japan", "/enquiry", "", "New Enquiry", 15, "Idris"],
+  ["Layla Haddad", "layla@example.test", "+966 50 000 0000", "Saudi Arabia", "/services", "linkedin.com", "On Hold", 18, "Maya"],
+  ["Oliver Grant", "oliver@example.test", "+1 415 555 0100", "United States", "/enquiry", "google.com", "Completed", 21, "Idris"]
 ];
 
-/* a few seeded conversations (client wrote first), by client index */
+/* One preset per kind of business. The words on the client card, the sample clients and the AI's facts follow the choice. */
+window.DEMO_PRESETS = {
+  general: { label: "General business", brand: "Your Company", interest: "Service wanted", size: "People involved", unit: "people", pitch: "Prices start at $500 and a first consultation is free.",
+    profile: "Your Company serves business and private customers. Prices start at $500. A first consultation is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Service package", "Monthly plan", "One-off project", "Consultation", "Annual contract", "Training session", "Custom order", "Support plan"],
+    sizes: [2, 5, 1, 1, 12, 8, 1, 3], budgets: ["$500 to $1,500", "$1,000 to $3,000", "$2,000 to $4,000", "$500 to $800", "$5,000 to $9,000", "$1,500 to $2,500", "$800 to $1,500", "$2,000 to $3,500"], f: 0.4 },
+  agency: { label: "Agency or B2B services", brand: "Your Agency", interest: "Service wanted", size: "Team size", unit: "people", pitch: "Projects start at $2,000 and a first consultation is free.",
+    profile: "Your Agency provides web, marketing and software services to other businesses. Projects start at $2,000. A first consultation is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Website redesign", "Annual support plan", "Online shop setup", "Marketing audit", "Staff training programme", "Process automation", "Software rollout", "Brand identity"],
+    sizes: [12, 40, 8, 5, 25, 15, 60, 3], budgets: ["$5,000 to $10,000", "$10,000 to $20,000", "$8,000 to $15,000", "$2,000 to $4,000", "$15,000 to $25,000", "$10,000 to $18,000", "$30,000 to $50,000", "$3,000 to $6,000"], f: 1 },
+  realestate: { label: "Real estate", brand: "Your Realty", interest: "Property type", size: "Rooms", unit: "rooms", pitch: "Properties start at $120,000 and a first viewing is free.",
+    profile: "Your Realty sells and rents homes and commercial space. Properties start at $120,000. A first viewing is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Family house", "City apartment", "Office space", "Retail unit", "Garden house", "Studio flat", "Warehouse", "Penthouse"],
+    sizes: [6, 4, 10, 3, 8, 2, 1, 7], budgets: ["$350,000 to $450,000", "$200,000 to $280,000", "$400,000 to $600,000", "$150,000 to $250,000", "$500,000 to $700,000", "$120,000 to $160,000", "$300,000 to $450,000", "$800,000 to $1,100,000"], f: 8 },
+  clinic: { label: "Clinic and beauty", brand: "Your Clinic", interest: "Treatment", size: "Sessions", unit: "sessions", pitch: "Treatments start at $80 and a first assessment is free.",
+    profile: "Your Clinic offers health, skin and wellness treatments. Treatments start at $80. A first assessment is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Skin consultation", "Dental check-up", "Physiotherapy plan", "Laser treatment", "Facial course", "Hair restoration", "Health assessment", "Teeth whitening"],
+    sizes: [1, 2, 6, 4, 5, 3, 1, 2], budgets: ["$80 to $150", "$100 to $200", "$400 to $700", "$300 to $600", "$250 to $500", "$900 to $1,500", "$120 to $250", "$200 to $350"], f: 0.08 },
+  shop: { label: "Shop or wholesale", brand: "Your Shop", interest: "Product", size: "Quantity", unit: "units", pitch: "Orders start at $300 and samples are free.",
+    profile: "Your Shop supplies products to businesses and households, with wholesale prices on larger orders. Orders start at $300. Samples are free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Bulk coffee order", "Office furniture", "Custom uniforms", "Wholesale tiles", "Gift boxes", "Packaging supplies", "Kitchen equipment", "Branded stationery"],
+    sizes: [200, 40, 150, 500, 300, 1000, 12, 2000], budgets: ["$1,500 to $3,000", "$4,000 to $7,000", "$2,000 to $3,500", "$3,000 to $5,000", "$800 to $1,500", "$1,200 to $2,500", "$5,000 to $9,000", "$600 to $1,200"], f: 0.5 },
+  school: { label: "School and coaching", brand: "Your Academy", interest: "Course", size: "Learners", unit: "learners", pitch: "Courses start at $200 and the first lesson is free.",
+    profile: "Your Academy teaches children, adults and companies. Courses start at $200. The first lesson is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["IELTS preparation", "Kids coding club", "Business English", "Maths tutoring", "Music lessons", "Exam revision", "Corporate training", "Career coaching"],
+    sizes: [1, 12, 20, 2, 1, 30, 50, 1], budgets: ["$300 to $500", "$400 to $800", "$600 to $1,200", "$200 to $400", "$250 to $450", "$500 to $900", "$3,000 to $6,000", "$300 to $600"], f: 0.06 },
+  events: { label: "Events and hospitality", brand: "Your Events", interest: "Event type", size: "Guests", unit: "guests", pitch: "Events start at $3,000 and a site visit is free.",
+    profile: "Your Events plans weddings, corporate events and private parties. Events start at $3,000. A site visit is free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Wedding reception", "Corporate dinner", "Birthday party", "Conference", "Product launch", "Baby shower", "Charity gala", "Team offsite"],
+    sizes: [120, 60, 40, 300, 150, 30, 200, 45], budgets: ["$12,000 to $20,000", "$6,000 to $10,000", "$3,000 to $5,000", "$25,000 to $40,000", "$10,000 to $18,000", "$3,000 to $4,500", "$20,000 to $35,000", "$5,000 to $9,000"], f: 1 },
+  travel: { label: "Travel and tourism", brand: "Your Travel", interest: "Trip wanted", size: "Travellers", unit: "travellers", pitch: "Trips start at $1,500 and planning calls are free.",
+    profile: "Your Travel plans holidays and group trips. Trips start at $1,500. Planning calls are free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Family holiday", "Honeymoon trip", "Group tour", "City break", "Safari trip", "Business trip", "Cruise package", "Ski week"],
+    sizes: [4, 2, 16, 2, 6, 3, 5, 4], budgets: ["$4,000 to $8,000", "$5,000 to $9,000", "$15,000 to $25,000", "$1,500 to $3,000", "$8,000 to $14,000", "$2,000 to $4,000", "$6,000 to $10,000", "$4,000 to $7,000"], f: 0.9 }
+};
+window.DEMO_PRESET_ORDER = ["general", "agency", "realestate", "clinic", "shop", "school", "events", "travel"];
+window.DEMO_BASE_VALUES = [4200, 8400, 12600, 16800, 21000, 25200, 29400, 33600];
+
+/* a few seeded conversations, by client index. {i} = what the client is interested in */
 window.DEMO_THREADS = {
-  0: [["in", "Hello, we want to redesign our company website and add a booking page. Can you also host it for us?"]],
-  1: [["in", "Good evening. We need ongoing IT support for about 40 staff. What would you suggest?"],
-      ["out", "Good evening Rashid, thank you for writing. We can set up a yearly support plan with a named contact. Shall we arrange a short call to agree the details?"]],
-  3: [["in", "Hi, we are a small shop and would like a marketing audit before we spend more on advertising."]]
+  0: [["in", "Hello, I am interested in {i} and would like to know more. Can you tell me how it works?"]],
+  1: [["in", "Good evening. I would like to ask about {i}. What would you suggest?"],
+      ["out", "Good evening, thank you for writing. We can help with {i}. Shall we arrange a short call to agree the details?"]],
+  3: [["in", "Hi, I found you online and I am looking for {i}. Could you send me some information?"]]
 };

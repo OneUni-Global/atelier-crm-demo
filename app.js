@@ -8,6 +8,10 @@
   var idleTimer = null, tickTimer = null, callRun = 0;
 
   function $(s, r) { return (r || document).querySelector(s); }
+  function P() { return window.DEMO_PRESETS[(S && S.preset) || "general"]; }
+  function typeOptions(sel) {
+    return window.DEMO_PRESET_ORDER.map(function (k) { return '<option value="' + k + '"' + (k === sel ? " selected" : "") + ">" + esc(window.DEMO_PRESETS[k].label) + "</option>"; }).join("");
+  }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function money(n) { return "$" + Number(n || 0).toLocaleString("en-US"); }
   function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
@@ -18,18 +22,20 @@
   function toast(msg) { var t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove("on"); }, 2800); }
 
   /* ---------------------------------------------------------------- sandbox lifecycle */
-  function build() {
-    var s = { user: { email: "", pass: "" }, clients: [], nextId: 1, drafts: [], calls: [], last: Date.now(), view: "card", recording: true };
+  function build(key) {
+    key = window.DEMO_PRESETS[key] ? key : "general";
+    var PR = window.DEMO_PRESETS[key];
+    var s = { preset: key, user: { email: "", pass: "" }, clients: [], nextId: 1, drafts: [], calls: [], last: Date.now(), view: "card", recording: true };
     var hex = function (n) { var o = ""; for (var i = 0; i < n; i++) o += "0123456789abcdef"[Math.floor(Math.random() * 16)]; return o; };
     s.user.email = "demo-" + hex(8) + "@demo.local";
     s.user.pass = hex(4) + "-" + hex(4) + "-" + hex(4);
-    window.DEMO_CLIENTS.forEach(function (r, i) {
-      var c = { id: s.nextId++, name: r[0], email: r[1], phone: r[2], country: r[3], guests: r[4], exp: r[5], budget: r[6], page: r[7], ref: r[8],
-        status: r[9], value: r[10], created: Date.now() - r[11] * 864e5, owner: r[12], notes: [], tasks: [], timeline: [], msgs: [], calls: [] };
-      c.timeline.push({ w: daysAgoStr(r[11]), t: "Enquiry received through " + (r[7] === "/contact" ? "the Contact Us form" : "the Request a Quote form") + " (" + r[7] + ")" });
-      if (r[9] !== "New Enquiry") c.timeline.push({ w: daysAgoStr(Math.max(r[11] - 1, 0)), t: "Status changed to " + r[9] });
-      c.tasks.push({ id: 1, title: "Reply to " + r[0], due: daysAgoStr(r[11] - 1), done: r[9] !== "New Enquiry" });
-      (window.DEMO_THREADS[i] || []).forEach(function (m, k) { c.msgs.push({ dir: m[0], text: m[1], w: daysAgoStr(Math.max(r[11] - k, 0)) }); });
+    window.DEMO_BASE.forEach(function (r, i) {
+      var c = { id: s.nextId++, name: r[0], email: r[1], phone: r[2], country: r[3], guests: PR.sizes[i], exp: PR.interests[i], budget: PR.budgets[i], page: r[4], ref: r[5],
+        status: r[6], value: Math.round(window.DEMO_BASE_VALUES[i] * PR.f / 100) * 100, created: Date.now() - r[7] * 864e5, owner: r[8], notes: [], tasks: [], timeline: [], msgs: [], calls: [] };
+      c.timeline.push({ w: daysAgoStr(r[7]), t: "Enquiry received through " + (r[4] === "/contact" ? "the Contact Us form" : "the website enquiry form") + " (" + r[4] + ")" });
+      if (r[6] !== "New Enquiry") c.timeline.push({ w: daysAgoStr(Math.max(r[7] - 1, 0)), t: "Status changed to " + r[6] });
+      c.tasks.push({ id: 1, title: "Reply to " + r[0], due: daysAgoStr(r[7] - 1), done: r[6] !== "New Enquiry" });
+      (window.DEMO_THREADS[i] || []).forEach(function (m, k) { c.msgs.push({ dir: m[0], text: m[1].split("{i}").join(PR.interests[i].toLowerCase()), w: daysAgoStr(Math.max(r[7] - k, 0)) }); });
       s.clients.push(c);
     });
     return s;
@@ -73,13 +79,13 @@
     var body;
     if (reason === "reply") {
       body = "Hello " + f + ", thank you for writing to us about your " + c.exp.toLowerCase() + ". " +
-        "We would be glad to help your team of " + c.guests + ". Our packages start at $2,000 and a first consultation call is free. " +
+        P().pitch + " " +
         "Would a short call this week suit you?";
     } else {
       body = "Hello " + f + ", I wanted to check that you received our reply about your " + c.exp.toLowerCase() + ". " +
         "If it helps, a free consultation call is a good way to shape the plan. Would you like us to arrange one?";
     }
-    return { id: Date.now() + Math.floor(Math.random() * 999), clientId: c.id, reason: reason, body: body, blocked: moneyBad(body, window.DEMO_PROFILE + " " + c.budget) };
+    return { id: Date.now() + Math.floor(Math.random() * 999), clientId: c.id, reason: reason, body: body, blocked: moneyBad(body, P().profile + " " + c.budget) };
   }
   function sendMessage(c, text, auto) {
     c.msgs.push({ dir: "out", text: text, w: nowStr() });
@@ -99,7 +105,7 @@
     return '<div class="demo-banner"><b>Demo sandbox.</b> Fictional data only. Your changes stay in this browser tab and everything resets when you sign out, after ' + CFG.idleMinutes +
       ' quiet minutes, or when you close the tab. Idle reset in <b id="idle">--:--</b>.</div>' +
       '<div class="layout"><aside class="side"><div class="logo"><img src="logo.png" alt="" class="lg">Atelier<small>CLIENT RELATIONS</small></div><nav class="nav">' + nav + '</nav>' +
-      '<div class="me"><b>Demo Visitor</b>' + esc(S.user.email) + '<br><a href="#/signout" id="signout">Sign out and reset</a></div></aside>' +
+      '<div class="me"><b>Demo Visitor</b>' + esc(S.user.email) + '<div class="field" style="margin:10px 0 8px"><label>Kind of business</label><select id="ptype2">' + typeOptions(S.preset) + '</select></div><a href="#/signout" id="signout">Sign out and reset</a></div></aside>' +
       '<main class="main"><div class="content">' + inner + '</div><div class="foot">Atelier CRM <span>&middot;</span> demo with fictional data <span>&middot;</span> Created by OneUni Global</div></main></div>';
   }
 
@@ -137,7 +143,7 @@
     if (!list.length) body = '<div class="card"><p class="mut">No clients match.</p></div>';
     else if (S.view === "card") body = '<div class="cards">' + list.map(function (c) {
       return '<a class="lead-card" href="#/client/' + c.id + '"><div class="nm">' + esc(c.name) + '</div><div class="meta">' + esc(c.exp) + " &middot; " + esc(c.country) + '</div><div class="meta">' +
-        c.guests + " people &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
+        c.guests + " " + P().unit + " &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
     }).join("") + "</div>";
     else body = '<div class="card"><table><tr><th>Client</th><th>Experience</th><th>Country</th><th>Status</th><th>Value</th></tr>' + list.map(function (c) {
       return '<tr><td><a href="#/client/' + c.id + '">' + esc(c.name) + "</a></td><td>" + esc(c.exp) + "</td><td>" + esc(c.country) + "</td><td>" + pill(c.status) + "</td><td>" + money(c.value) + "</td></tr>";
@@ -165,7 +171,7 @@
     else pane = c.calls.length ? c.calls.map(callCard).join("") : '<p class="mut">No calls filed yet. Try the <a href="#/calls">call agent</a> to see one filed here.</p>';
     return '<div class="top"><div><a href="#/clients" class="mut">&larr; Clients</a><h1>' + esc(c.name) + "</h1><p>" + esc(c.exp) + " &middot; " + esc(c.country) + " &middot; owner " + esc(c.owner) + "</p></div><div>" + pill(c.status) + "</div></div>" +
       '<div class="grid g2"><div class="card"><div class="tabs">' + tabs.map(function (t) { return '<a href="#" class="tab' + (TAB === t[0] ? " on" : "") + '" data-tab="' + t[0] + '">' + t[1] + "</a>"; }).join("") + "</div>" + pane + "</div>" +
-      '<div class="card"><h3>Details</h3><dl class="dl"><dt>Email</dt><dd>' + esc(c.email) + "</dd><dt>Phone</dt><dd>" + esc(c.phone) + "</dd><dt>Team size</dt><dd>" + c.guests + "</dd><dt>Budget</dt><dd>" + esc(c.budget) + "</dd><dt>Came from</dt><dd>" + esc(c.page) + (c.ref ? " via " + esc(c.ref) : "") + "</dd></dl>" +
+      '<div class="card"><h3>Details</h3><dl class="dl"><dt>Email</dt><dd>' + esc(c.email) + "</dd><dt>Phone</dt><dd>" + esc(c.phone) + "</dd><dt>" + esc(P().interest) + "</dt><dd>" + esc(c.exp) + "</dd><dt>" + esc(P().size) + "</dt><dd>" + c.guests + "</dd><dt>Budget</dt><dd>" + esc(c.budget) + "</dd><dt>Came from</dt><dd>" + esc(c.page) + (c.ref ? " via " + esc(c.ref) : "") + "</dd></dl>" +
       '<div class="field"><label>Status</label><select id="cst">' + STATUSES.map(function (s) { return "<option" + (c.status === s ? " selected" : "") + ">" + esc(s) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label>Deal value (USD)</label><input id="cval" type="number" value="' + c.value + '"></div></div></div>';
   }
@@ -199,9 +205,9 @@
       '<div class="note">In this demo the writing is simulated so it works for everyone with no setup. In the real product you choose a free local model (LM Studio or Ollama, nothing leaves your computer) or a cloud model with your own key.</div>' +
       '<div class="grid g22"><div class="card"><h3>Engine and mode</h3><div class="field"><label>Where the AI runs</label><select disabled><option>Local AI (LM Studio or Ollama) - free</option><option>Cloud AI (your own API key)</option></select></div>' +
       '<div class="field"><label>Mode</label><select disabled><option>Draft for approval (replies are never sent automatically)</option><option>Send follow-ups automatically, 08:00 to 20:00, daily limit</option></select></div>' +
-      '<div class="field"><label>Business profile (the only facts it may use)</label><textarea readonly>' + esc(window.DEMO_PROFILE) + "</textarea></div></div>" +
+      '<div class="field"><label>Business profile (the only facts it may use)</label><textarea readonly>' + esc(P().profile) + "</textarea></div></div>" +
       '<div class="card"><h3>Its rules</h3><ul class="rules"><li>Uses only the client file and your business profile</li><li>Any money amount that is not in your facts blocks the draft</li><li>Never leaves placeholders or says it is an AI</li><li>Writes in the language the client used</li><li>Stops for anyone who says stop, unsubscribe or not interested</li><li>Follow-ups are limited by days of quiet, touches per client and a daily cap</li></ul></div></div>' +
-      '<div class="card" style="margin-top:16px"><h3>Try the safety check</h3><p class="mut">Paste or type a message. If it quotes a price that is not in the business profile, it is blocked, just as the real assistant does.</p><textarea id="gtext" placeholder="For example: We can offer you the package for $900."></textarea><div class="row2" style="margin-top:8px"><button id="gbtn">Check message</button></div><div id="gout"></div></div>' +
+      '<div class="card" style="margin-top:16px"><h3>Try the safety check</h3><p class="mut">Paste or type a message. If it quotes a price that is not in the business profile, it is blocked, just as the real assistant does.</p><textarea id="gtext" placeholder="For example: We can offer you this for $777."></textarea><div class="row2" style="margin-top:8px"><button id="gbtn">Check message</button></div><div id="gout"></div></div>' +
       '<div class="top" style="margin-top:22px"><div><h3>Drafts waiting for you</h3></div><div><button id="sweep">Check for quiet clients</button></div></div>' + (drafts || '<div class="card"><p class="mut">No drafts yet. Press "Check for quiet clients" to see follow-ups written for clients who have gone quiet.</p></div>');
   }
 
@@ -244,9 +250,9 @@
   }
 
   function vLanding(msg) {
-    return '<div class="land"><img src="logo.png" alt="" class="lg2"><h1>Atelier CRM</h1><p class="lead">A private CRM for businesses that win clients through enquiries. Try the real screens with fictional clients, in your own sandbox.</p>' +
+    return '<div class="land"><img src="logo.png" alt="" class="lg2"><h1>Atelier CRM</h1><p class="lead">A CRM for any business that wins clients through enquiries: agencies, real estate, clinics, shops, schools, events, travel and more. Choose your kind of business, then try the real screens with fictional clients in your own sandbox.</p>' +
       (msg ? '<div class="flash">' + esc(msg) + "</div>" : "") +
-      '<button id="start" class="big">Start my demo sandbox</button><p class="mut">No sign-up. We create a temporary account for you. It resets when you sign out, after ' + CFG.idleMinutes + ' quiet minutes, or when you close the tab. Many people can try it at the same time and never see each other\'s changes.</p>' +
+      '<div class="field" style="max-width:340px;margin:0 auto 14px;text-align:left"><label>Your kind of business</label><select id="ptype">' + typeOptions("general") + '</select></div><button id="start" class="big">Start my demo sandbox</button><p class="mut">No sign-up. We create a temporary account for you. It resets when you sign out, after ' + CFG.idleMinutes + ' quiet minutes, or when you close the tab. Many people can try it at the same time and never see each other\'s changes.</p>' +
       '<div class="feat"><div><b>One card per client</b><br>Every enquiry, message, call, task and note in one place.</div><div><b>AI sales assistant</b><br>Drafts replies and follow-ups from your facts, with your approval.</div><div><b>Call agent, 10 languages</b><br>Answers calls, detects the caller\'s language and files the call.</div><div><b>Private by design</b><br>Your data stays on your own computer. No per-seat fee.</div></div></div>';
   }
 
@@ -255,7 +261,7 @@
     var run = ++callRun, box = $("#callbox"), l1 = LANGS.filter(function (l) { return l.code === $("#cl1").value; })[0], l2 = LANGS.filter(function (l) { return l.code === $("#cl2").value; })[0];
     var who = $("#cwho").value, rec = $("#crec").checked; S.recording = rec; save();
     var turns = [], steps = [];
-    var greet = (rec ? "This call is being recorded. " : "") + "Hello, this is Sara from " + CFG.brand + ". How can I help you?";
+    var greet = (rec ? "This call is being recorded. " : "") + "Hello, this is Sara from " + P().brand + ". How can I help you?";
     steps.push(["agent", greet, null]);
     steps.push(["caller", l1.q1, l1]); steps.push(["agent", l1.a1, l1]);
     steps.push(["caller", l2.q2, l2]); steps.push(["agent", l2.h, l2]);
@@ -291,7 +297,7 @@
   /* ---------------------------------------------------------------- render + events */
   function render() {
     var app = $("#app"), h = (location.hash || "#/").replace(/^#\/?/, ""), parts = h.split("/"), p = parts[0] || "dashboard";
-    if (!S) { app.innerHTML = vLanding(render.msg); render.msg = ""; var b = $("#start"); if (b) b.onclick = function () { S = build(); save(); startTimers(); location.hash = "#/dashboard"; render(); }; return; }
+    if (!S) { app.innerHTML = vLanding(render.msg); render.msg = ""; var b = $("#start"); if (b) b.onclick = function () { S = build($("#ptype") ? $("#ptype").value : "general"); save(); startTimers(); location.hash = "#/dashboard"; render(); }; return; }
     if (p === "signout") { wipe(); render.msg = "You signed out and the sandbox was wiped. Start a new one any time."; location.hash = "#/"; return; }
     var inner = "", active = p;
     if (p === "client") { inner = vClient(Number(parts[1])); active = "clients"; }
@@ -329,7 +335,7 @@
     }
     if (p === "tasks") all(".gchk", "change", function (e) { var c = byId(Number(e.getAttribute("data-c"))); c.tasks.forEach(function (t) { if (t.id === Number(e.getAttribute("data-t"))) t.done = true; }); save(); toast("Task done"); render(); });
     if (p === "ai") {
-      on("#gbtn", "click", function () { var t = $("#gtext").value, bad = moneyBad(t, window.DEMO_PROFILE); $("#gout").innerHTML = bad ? '<div class="flash bad" style="margin-top:10px">Blocked. This message quotes ' + esc(bad) + ", which is not in your business profile.</div>" : '<div class="flash" style="margin-top:10px">Passes the check. It quotes no amount that is missing from your facts.</div>'; });
+      on("#gbtn", "click", function () { var t = $("#gtext").value, bad = moneyBad(t, P().profile); $("#gout").innerHTML = bad ? '<div class="flash bad" style="margin-top:10px">Blocked. This message quotes ' + esc(bad) + ", which is not in your business profile.</div>" : '<div class="flash" style="margin-top:10px">Passes the check. It quotes no amount that is missing from your facts.</div>'; });
       on("#sweep", "click", function () {
         var quiet = S.clients.filter(function (c) { return OPEN.indexOf(c.status) > -1 && Date.now() - c.created > 2 * 864e5 && !S.drafts.some(function (d) { return d.clientId === c.id; }); }).slice(0, 3);
         if (!quiet.length) return toast("No quiet clients right now");
@@ -343,6 +349,9 @@
       on("#callgo", "click", runCall); on("#callstop", "click", function () { callRun++; $("#callbox").innerHTML += '<div class="flash">Call ended early.</div>'; $("#callstop").style.display = "none"; $("#callgo").style.display = ""; });
     }
     if (p === "get") on("#gsend", "click", sendContact);
+    on("#ptype2", "change", function (e) {
+      var u = S.user; S = build(e.target.value); S.user = u; save(); toast("Switched to " + P().label + ": sample clients and wording follow your choice"); location.hash = "#/clients"; render();
+    });
     on("#signout", "click", function (ev) { ev.preventDefault(); location.hash = "#/signout"; });
   }
   function sayHandler(ev) {
@@ -364,7 +373,7 @@
   function addClientModal() {
     var m = document.createElement("div"); m.className = "modal";
     m.innerHTML = '<div class="card box"><h3>Add a client</h3><div class="field"><label>Name</label><input id="mn"></div><div class="row"><div class="field"><label>Email</label><input id="me"></div><div class="field"><label>Country</label><input id="mc"></div></div>' +
-      '<div class="row"><div class="field"><label>Experience wanted</label><input id="mx"></div><div class="field"><label>Deal value (USD)</label><input id="mv" type="number" value="5000"></div></div><div class="row2"><button id="mok">Add</button><button class="ghost" id="mno">Cancel</button></div></div>';
+      '<div class="row"><div class="field"><label>" + esc(P().interest) + "</label><input id="mx"></div><div class="field"><label>Deal value (USD)</label><input id="mv" type="number" value="5000"></div></div><div class="row2"><button id="mok">Add</button><button class="ghost" id="mno">Cancel</button></div></div>';
     document.body.appendChild(m);
     $("#mno").onclick = function () { m.remove(); };
     $("#mok").onclick = function () {
