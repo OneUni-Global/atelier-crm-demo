@@ -2,8 +2,7 @@
 window.DEMO_CONFIG = {
   idleMinutes: 10,                 // a sandbox resets after this many minutes without a click (owner can change)
   brand: "Your Company",
-  contactEmail: "oneuni.global@gmail.com",   // used by the "Get the app" form (opens the visitor's mail app)
-  contactEndpoint: ""              // optional: a form service address (for example Formspree). Leave empty to use email.
+  contactUrl: "https://dwjautomations.blogspot.com/p/contact-us.html"   // the same contact form as the DWJ Automations blog: messages reach the owner with no email app needed
 };
 
 window.DEMO_STATUSES = ["New Enquiry", "Contacted", "Consultation", "Proposal Sent", "Confirmed", "Completed", "On Hold", "Lost"];

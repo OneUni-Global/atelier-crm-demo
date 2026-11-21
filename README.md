@@ -9,12 +9,11 @@ An interactive demo that runs entirely in the visitor's own browser. Safe to hos
 
 **Any kind of business:** the visitor chooses their kind of business (general, agency or B2B services, e-commerce agency, online store, real estate, clinic and beauty, shop or wholesale, school and coaching, events and hospitality, travel and tourism) when they start, and can switch inside the sandbox. The sample clients, the words on the client card and the facts the AI may use all follow the choice. The presets are in `data.js` (`DEMO_PRESETS`).
 
-**What it shows:** client cards and profiles, conversation, timeline, tasks, notes, insights, the AI sales assistant (simulated, with the real price-safety rule), the call agent (simulated, 10 languages with language detection) and the privacy answers. A "Get the app" form lets buyers contact the owner.
+**What it shows:** client cards and profiles, conversation, timeline, tasks, notes, insights, the AI sales assistant (simulated, with the real price-safety rule), the call agent (simulated, 10 languages with language detection) and the privacy answers. A "Get the app" page shows the same contact form as the DWJ Automations blog, so buyers reach the owner with no email app needed.
 
 **Settings** (top of `data.js`, `DEMO_CONFIG`)
 - `idleMinutes`: how many quiet minutes before a sandbox resets (default 10).
-- `contactEmail`: where the "Get the app" form opens an email to.
-- `contactEndpoint`: optional form service address (for example Formspree) so the form sends without opening an email app.
+- `contactUrl`: the contact form page shown on "Get the app" (currently the DWJ Automations blog contact page).
 
 **Host it on GitHub Pages:** put these files in a repository, then Settings > Pages > deploy from the main branch, root folder.
 

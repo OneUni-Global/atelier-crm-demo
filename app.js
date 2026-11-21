@@ -244,10 +244,10 @@
   }
 
   function vGet() {
-    return '<div class="top"><div><h1>Get Atelier CRM</h1><p>Self-hosted, no per-seat fee, set up with you. Tell us about your business and we will reply.</p></div></div>' +
-      '<div class="card" style="max-width:640px"><div class="field"><label>Your name</label><input id="gn"></div><div class="field"><label>Your email</label><input id="ge" type="email"></div>' +
-      '<div class="field"><label>Your business</label><input id="gb" placeholder="For example: agency, clinic, real estate, shop"></div><div class="field"><label>How do enquiries reach you today?</label><textarea id="gm"></textarea></div>' +
-      '<button id="gsend">Send</button><p class="mut" id="gnote" style="margin-top:10px">This opens your email app with the message ready to send.</p></div>';
+    var u = CFG.contactUrl;
+    return '<div class="top"><div><h1>Get Atelier CRM</h1><p>Self-hosted, no per-seat fee, set up with you. Tell us how enquiries reach you today and we will reply.</p></div><a class="btn" href="' + esc(u) + '" target="_blank" rel="noopener">Open the form in a new tab</a></div>' +
+      '<div class="card" style="padding:0;overflow:hidden"><iframe src="' + esc(u) + '" title="Contact form" style="width:100%;height:1100px;border:0;background:#fff" loading="lazy"></iframe></div>' +
+      '<p class="mut" style="margin-top:10px">If the form does not show above, use "Open the form in a new tab". It is the same contact form as the DWJ Automations blog, so your message reaches us directly and no email app is needed.</p>';
   }
 
   function vLanding(msg) {
@@ -349,7 +349,6 @@
       $("#cl2").value = "ur"; $("#cl1").value = "en";
       on("#callgo", "click", runCall); on("#callstop", "click", function () { callRun++; $("#callbox").innerHTML += '<div class="flash">Call ended early.</div>'; $("#callstop").style.display = "none"; $("#callgo").style.display = ""; });
     }
-    if (p === "get") on("#gsend", "click", sendContact);
     on("#ptype2", "change", function (e) {
       var u = S.user; S = build(e.target.value); S.user = u; save(); toast("Switched to " + P().label + ": sample clients and wording follow your choice"); location.hash = "#/clients"; render();
     });
@@ -358,18 +357,6 @@
   function sayHandler(ev) {
     var a = ev.target.closest && ev.target.closest(".say"); if (!a) return; ev.preventDefault();
     try { var u = new SpeechSynthesisUtterance(a.getAttribute("data-t")); u.lang = a.getAttribute("data-l"); speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { toast("Your browser has no voice for this language"); }
-  }
-  function sendContact() {
-    var n = $("#gn").value.trim(), e = $("#ge").value.trim(), b = $("#gb").value.trim(), m = $("#gm").value.trim();
-    if (!n || !e) return toast("Please add your name and email");
-    var body = "Name: " + n + "\nEmail: " + e + "\nBusiness: " + b + "\n\n" + m;
-    if (CFG.contactEndpoint) {
-      fetch(CFG.contactEndpoint, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify({ name: n, email: e, business: b, message: m, source: "atelier-crm-demo" }) })
-        .then(function () { $("#gnote").textContent = "Thank you. We will reply to " + e + "."; }).catch(function () { $("#gnote").textContent = "Could not send. Please email us directly."; });
-    } else {
-      location.href = "mailto:" + CFG.contactEmail + "?subject=" + encodeURIComponent("Atelier CRM enquiry from " + n) + "&body=" + encodeURIComponent(body);
-      $("#gnote").textContent = "Your email app should open with the message ready. Send it from there.";
-    }
   }
   function addClientModal() {
     var m = document.createElement("div"); m.className = "modal";
