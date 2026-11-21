@@ -8,6 +8,7 @@
   var idleTimer = null, tickTimer = null, callRun = 0;
 
   function $(s, r) { return (r || document).querySelector(s); }
+  function unitFor(n) { var u = P().unit; return Number(n) === 1 ? (u === "people" ? "person" : u.replace(/s$/, "")) : u; }
   function P() { return window.DEMO_PRESETS[(S && S.preset) || "general"]; }
   function typeOptions(sel) {
     return window.DEMO_PRESET_ORDER.map(function (k) { return '<option value="' + k + '"' + (k === sel ? " selected" : "") + ">" + esc(window.DEMO_PRESETS[k].label) + "</option>"; }).join("");
@@ -143,7 +144,7 @@
     if (!list.length) body = '<div class="card"><p class="mut">No clients match.</p></div>';
     else if (S.view === "card") body = '<div class="cards">' + list.map(function (c) {
       return '<a class="lead-card" href="#/client/' + c.id + '"><div class="nm">' + esc(c.name) + '</div><div class="meta">' + esc(c.exp) + " &middot; " + esc(c.country) + '</div><div class="meta">' +
-        c.guests + " " + P().unit + " &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
+        c.guests + " " + unitFor(c.guests) + " &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
     }).join("") + "</div>";
     else body = '<div class="card"><table><tr><th>Client</th><th>Experience</th><th>Country</th><th>Status</th><th>Value</th></tr>' + list.map(function (c) {
       return '<tr><td><a href="#/client/' + c.id + '">' + esc(c.name) + "</a></td><td>" + esc(c.exp) + "</td><td>" + esc(c.country) + "</td><td>" + pill(c.status) + "</td><td>" + money(c.value) + "</td></tr>";
