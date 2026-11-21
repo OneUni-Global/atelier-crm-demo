@@ -88,9 +88,17 @@ window.DEMO_PRESETS = {
   travel: { label: "Travel and tourism", brand: "Your Travel", interest: "Trip wanted", size: "Travellers", unit: "travellers", pitch: "Trips start at $1,500 and planning calls are free.",
     profile: "Your Travel plans holidays and group trips. Trips start at $1,500. Planning calls are free. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
     interests: ["Family holiday", "Honeymoon trip", "Group tour", "City break", "Safari trip", "Business trip", "Cruise package", "Ski week"],
-    sizes: [4, 2, 16, 2, 6, 3, 5, 4], budgets: ["$4,000 to $8,000", "$5,000 to $9,000", "$15,000 to $25,000", "$1,500 to $3,000", "$8,000 to $14,000", "$2,000 to $4,000", "$6,000 to $10,000", "$4,000 to $7,000"], f: 0.9 }
+    sizes: [4, 2, 16, 2, 6, 3, 5, 4], budgets: ["$4,000 to $8,000", "$5,000 to $9,000", "$15,000 to $25,000", "$1,500 to $3,000", "$8,000 to $14,000", "$2,000 to $4,000", "$6,000 to $10,000", "$4,000 to $7,000"], f: 0.9 },
+  ecomagency: { label: "E-commerce agency", brand: "Your E-commerce Agency", interest: "Service wanted", size: "Products in store", unit: "products", pitch: "Projects start at $1,500 and a free store review comes first.",
+    profile: "Your E-commerce Agency builds and grows online stores for brands: store builds, migrations, ads, email marketing and monthly store care. Projects start at $1,500. A free store review comes first. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Store build", "Store migration", "Conversion audit", "Paid ads management", "Email marketing setup", "Product photography", "Marketplace listings", "Monthly store care"],
+    sizes: [150, 2000, 40, 300, 80, 500, 1200, 60], budgets: ["$3,000 to $8,000", "$5,000 to $12,000", "$1,500 to $3,000", "$2,000 to $5,000", "$1,000 to $2,500", "$2,500 to $6,000", "$2,000 to $4,000", "$800 to $1,500"], f: 1 },
+  onlinestore: { label: "Online store", brand: "Your Store", interest: "Product", size: "Quantity", unit: "units", pitch: "Orders start at $25 and shipping is free over $100.",
+    profile: "Your Store sells products online with worldwide shipping. Orders start at $25. Shipping is free over $100. We reply within one working day. Opening hours: Monday to Friday, 9 am to 5 pm.",
+    interests: ["Wholesale order", "Corporate gift boxes", "Custom printed items", "Bulk reorder", "Subscription box", "Wedding favours", "Returns question", "Product bundle"],
+    sizes: [100, 50, 200, 500, 12, 150, 1, 10], budgets: ["$900 to $2,000", "$1,500 to $3,000", "$1,000 to $2,500", "$2,500 to $5,000", "$300 to $600", "$700 to $1,200", "$25 to $100", "$100 to $250"], f: 0.3 }
 };
-window.DEMO_PRESET_ORDER = ["general", "agency", "realestate", "clinic", "shop", "school", "events", "travel"];
+window.DEMO_PRESET_ORDER = ["general", "agency", "ecomagency", "onlinestore", "realestate", "clinic", "shop", "school", "events", "travel"];
 window.DEMO_BASE_VALUES = [4200, 8400, 12600, 16800, 21000, 25200, 29400, 33600];
 
 /* a few seeded conversations, by client index. {i} = what the client is interested in */
