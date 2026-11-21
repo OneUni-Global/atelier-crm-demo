@@ -14,7 +14,7 @@ An interactive demo that runs entirely in the visitor's own browser. Safe to hos
 - `contactEmail`: where the "Get the app" form opens an email to.
 - `contactEndpoint`: optional form service address (for example Formspree) so the form sends without opening an email app.
 
-**Host it on GitHub Pages:** put these files in a repository, then Settings > Pages > deploy from the main branch, root folder. `.nojekyll` is included.
+**Host it on GitHub Pages:** put these files in a repository, then Settings > Pages > deploy from the main branch, root folder.
 
 **Honest note:** the AI writing and the calls are scripted in this demo so it works for everyone with no setup. The real Atelier CRM uses your own local or cloud AI model and a real voice service.
 

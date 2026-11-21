@@ -26,7 +26,7 @@
     window.DEMO_CLIENTS.forEach(function (r, i) {
       var c = { id: s.nextId++, name: r[0], email: r[1], phone: r[2], country: r[3], guests: r[4], exp: r[5], budget: r[6], page: r[7], ref: r[8],
         status: r[9], value: r[10], created: Date.now() - r[11] * 864e5, owner: r[12], notes: [], tasks: [], timeline: [], msgs: [], calls: [] };
-      c.timeline.push({ w: daysAgoStr(r[11]), t: "Enquiry received through " + (r[7] === "/contact" ? "the Contact Us form" : "the Private Access form") + " (" + r[7] + ")" });
+      c.timeline.push({ w: daysAgoStr(r[11]), t: "Enquiry received through " + (r[7] === "/contact" ? "the Contact Us form" : "the Request a Quote form") + " (" + r[7] + ")" });
       if (r[9] !== "New Enquiry") c.timeline.push({ w: daysAgoStr(Math.max(r[11] - 1, 0)), t: "Status changed to " + r[9] });
       c.tasks.push({ id: 1, title: "Reply to " + r[0], due: daysAgoStr(r[11] - 1), done: r[9] !== "New Enquiry" });
       (window.DEMO_THREADS[i] || []).forEach(function (m, k) { c.msgs.push({ dir: m[0], text: m[1], w: daysAgoStr(Math.max(r[11] - k, 0)) }); });
@@ -73,7 +73,7 @@
     var body;
     if (reason === "reply") {
       body = "Hello " + f + ", thank you for writing to us about your " + c.exp.toLowerCase() + ". " +
-        "We would be glad to plan it for " + c.guests + " " + (c.guests === 1 ? "guest" : "guests") + ". Our packages start at $10,000 and a first consultation call is free. " +
+        "We would be glad to help your team of " + c.guests + ". Our packages start at $2,000 and a first consultation call is free. " +
         "Would a short call this week suit you?";
     } else {
       body = "Hello " + f + ", I wanted to check that you received our reply about your " + c.exp.toLowerCase() + ". " +
@@ -137,7 +137,7 @@
     if (!list.length) body = '<div class="card"><p class="mut">No clients match.</p></div>';
     else if (S.view === "card") body = '<div class="cards">' + list.map(function (c) {
       return '<a class="lead-card" href="#/client/' + c.id + '"><div class="nm">' + esc(c.name) + '</div><div class="meta">' + esc(c.exp) + " &middot; " + esc(c.country) + '</div><div class="meta">' +
-        c.guests + " guests &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
+        c.guests + " people &middot; " + esc(c.budget) + '</div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">' + pill(c.status) + '<b class="gold">' + money(c.value) + "</b></div></a>";
     }).join("") + "</div>";
     else body = '<div class="card"><table><tr><th>Client</th><th>Experience</th><th>Country</th><th>Status</th><th>Value</th></tr>' + list.map(function (c) {
       return '<tr><td><a href="#/client/' + c.id + '">' + esc(c.name) + "</a></td><td>" + esc(c.exp) + "</td><td>" + esc(c.country) + "</td><td>" + pill(c.status) + "</td><td>" + money(c.value) + "</td></tr>";
@@ -165,7 +165,7 @@
     else pane = c.calls.length ? c.calls.map(callCard).join("") : '<p class="mut">No calls filed yet. Try the <a href="#/calls">call agent</a> to see one filed here.</p>';
     return '<div class="top"><div><a href="#/clients" class="mut">&larr; Clients</a><h1>' + esc(c.name) + "</h1><p>" + esc(c.exp) + " &middot; " + esc(c.country) + " &middot; owner " + esc(c.owner) + "</p></div><div>" + pill(c.status) + "</div></div>" +
       '<div class="grid g2"><div class="card"><div class="tabs">' + tabs.map(function (t) { return '<a href="#" class="tab' + (TAB === t[0] ? " on" : "") + '" data-tab="' + t[0] + '">' + t[1] + "</a>"; }).join("") + "</div>" + pane + "</div>" +
-      '<div class="card"><h3>Details</h3><dl class="dl"><dt>Email</dt><dd>' + esc(c.email) + "</dd><dt>Phone</dt><dd>" + esc(c.phone) + "</dd><dt>Guests</dt><dd>" + c.guests + "</dd><dt>Budget</dt><dd>" + esc(c.budget) + "</dd><dt>Came from</dt><dd>" + esc(c.page) + (c.ref ? " via " + esc(c.ref) : "") + "</dd></dl>" +
+      '<div class="card"><h3>Details</h3><dl class="dl"><dt>Email</dt><dd>' + esc(c.email) + "</dd><dt>Phone</dt><dd>" + esc(c.phone) + "</dd><dt>Team size</dt><dd>" + c.guests + "</dd><dt>Budget</dt><dd>" + esc(c.budget) + "</dd><dt>Came from</dt><dd>" + esc(c.page) + (c.ref ? " via " + esc(c.ref) : "") + "</dd></dl>" +
       '<div class="field"><label>Status</label><select id="cst">' + STATUSES.map(function (s) { return "<option" + (c.status === s ? " selected" : "") + ">" + esc(s) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label>Deal value (USD)</label><input id="cval" type="number" value="' + c.value + '"></div></div></div>';
   }
@@ -201,7 +201,7 @@
       '<div class="field"><label>Mode</label><select disabled><option>Draft for approval (replies are never sent automatically)</option><option>Send follow-ups automatically, 08:00 to 20:00, daily limit</option></select></div>' +
       '<div class="field"><label>Business profile (the only facts it may use)</label><textarea readonly>' + esc(window.DEMO_PROFILE) + "</textarea></div></div>" +
       '<div class="card"><h3>Its rules</h3><ul class="rules"><li>Uses only the client file and your business profile</li><li>Any money amount that is not in your facts blocks the draft</li><li>Never leaves placeholders or says it is an AI</li><li>Writes in the language the client used</li><li>Stops for anyone who says stop, unsubscribe or not interested</li><li>Follow-ups are limited by days of quiet, touches per client and a daily cap</li></ul></div></div>' +
-      '<div class="card" style="margin-top:16px"><h3>Try the safety check</h3><p class="mut">Paste or type a message. If it quotes a price that is not in the business profile, it is blocked, just as the real assistant does.</p><textarea id="gtext" placeholder="For example: We can offer you the villa for $9,500."></textarea><div class="row2" style="margin-top:8px"><button id="gbtn">Check message</button></div><div id="gout"></div></div>' +
+      '<div class="card" style="margin-top:16px"><h3>Try the safety check</h3><p class="mut">Paste or type a message. If it quotes a price that is not in the business profile, it is blocked, just as the real assistant does.</p><textarea id="gtext" placeholder="For example: We can offer you the package for $900."></textarea><div class="row2" style="margin-top:8px"><button id="gbtn">Check message</button></div><div id="gout"></div></div>' +
       '<div class="top" style="margin-top:22px"><div><h3>Drafts waiting for you</h3></div><div><button id="sweep">Check for quiet clients</button></div></div>' + (drafts || '<div class="card"><p class="mut">No drafts yet. Press "Check for quiet clients" to see follow-ups written for clients who have gone quiet.</p></div>');
   }
 
@@ -239,7 +239,7 @@
   function vGet() {
     return '<div class="top"><div><h1>Get Atelier CRM</h1><p>Self-hosted, no per-seat fee, set up with you. Tell us about your business and we will reply.</p></div></div>' +
       '<div class="card" style="max-width:640px"><div class="field"><label>Your name</label><input id="gn"></div><div class="field"><label>Your email</label><input id="ge" type="email"></div>' +
-      '<div class="field"><label>Your business</label><input id="gb" placeholder="For example: villa rental, clinic, travel"></div><div class="field"><label>How do enquiries reach you today?</label><textarea id="gm"></textarea></div>' +
+      '<div class="field"><label>Your business</label><input id="gb" placeholder="For example: agency, clinic, real estate, shop"></div><div class="field"><label>How do enquiries reach you today?</label><textarea id="gm"></textarea></div>' +
       '<button id="gsend">Send</button><p class="mut" id="gnote" style="margin-top:10px">This opens your email app with the message ready to send.</p></div>';
   }
 
@@ -272,11 +272,11 @@
     }
     function finish() {
       var c = who === "new" ? null : byId(Number(who)), name = c ? c.name : "Unknown caller (WhatsApp)", langs = l1.name === l2.name ? l1.name : l1.name + " then " + l2.name;
-      var summary = "<ul><li><b>Wants:</b> opening hours, then to speak to a person about a payment.</li><li><b>Agent already said:</b> open every day 9 am to 6 pm.</li><li><b>Open:</b> the payment question, which the agent cannot answer.</li>" +
+      var summary = "<ul><li><b>Wants:</b> opening hours, then to speak to a person about a payment.</li><li><b>Agent already said:</b> open Monday to Friday, 9 am to 5 pm.</li><li><b>Open:</b> the payment question, which the agent cannot answer.</li>" +
         "<li><b>Suggested next step:</b> call back today on this number.</li><li><b>Tone:</b> calm and polite.</li><li><b>Languages heard:</b> " + esc(langs) + "</li></ul>" +
         '<p class="mut" dir="auto">Caller\'s last words, word for word: ' + esc(l2.q2) + "</p>";
       var rec2 = { title: "Call with " + name, langs: langs, w: nowStr(), summary: summary, turns: turns };
-      if (!c) { c = { id: S.nextId++, name: name, email: "", phone: "+44 7700 900999", country: "Unknown", guests: 0, exp: "Phone enquiry", budget: "-", page: "WhatsApp call", ref: "", status: "New Enquiry", value: 0, created: Date.now(), owner: "Maya", notes: [], tasks: [], timeline: [{ w: nowStr(), t: "New client created from a WhatsApp call" }], msgs: [], calls: [] }; S.clients.push(c); }
+      if (!c) { c = { id: S.nextId++, name: name, email: "", phone: "+44 7700 900999", country: "Unknown", guests: 1, exp: "Phone enquiry", budget: "-", page: "WhatsApp call", ref: "", status: "New Enquiry", value: 0, created: Date.now(), owner: "Maya", notes: [], tasks: [], timeline: [{ w: nowStr(), t: "New client created from a WhatsApp call" }], msgs: [], calls: [] }; S.clients.push(c); }
       c.calls.unshift(rec2); S.calls.unshift(rec2);
       addTimeline(c, "Call answered by the call agent (" + langs + ")");
       c.tasks.push({ id: Date.now(), title: "Call this client back now. The call agent could not answer: payment question", due: "Today", done: false });
